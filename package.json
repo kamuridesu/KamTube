@@ -1,0 +1,24 @@
+{
+  "name": "ytbtromloader",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "kamuridesu",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamuridesu/YTBTromloader.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kamuridesu/YTBTromloader/issues"
+  },
+  "homepage": "https://github.com/kamuridesu/YTBTromloader#readme",
+  "dependencies": {
+    "axios": "^0.25.0",
+    "node-html-parser": "^5.2.0"
+  },
+  "type": "module"
+}
