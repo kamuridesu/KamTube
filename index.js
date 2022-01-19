@@ -69,5 +69,4 @@ class YTBTromloader {
 }
 
 
-let ytb = new YTBTromloader('https://ytb.trom.tf/watch?v=ZqM-bJDIhOk');
-ytb.save(0, './test.mp4');
+export default YTBTromloader;
