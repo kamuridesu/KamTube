@@ -10,12 +10,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kamuridesu/YTBTromloader.git"
+    "url": "git+https://github.com/kamuridesu/KamTube.git"
   },
   "bugs": {
-    "url": "https://github.com/kamuridesu/YTBTromloader/issues"
+    "url": "https://github.com/kamuridesu/KamTube/issues"
   },
-  "homepage": "https://github.com/kamuridesu/YTBTromloader#readme",
+  "homepage": "https://github.com/kamuridesu/KamTube#readme",
   "dependencies": {
     "axios": "^0.25.0",
     "node-html-parser": "^5.2.0"
