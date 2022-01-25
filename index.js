@@ -65,11 +65,11 @@ class KamTube {
         }
     }
 
-    async download(quality) {
+    async download(video_id, quality) {
         try {
             const response = await axios({
                 method: "get",
-                url: await this.getVideoDownloadUrl(quality),
+                url: await this.getVideoDownloadUrl(video_id, quality),
                 headers: {
                     "DNT": 1,
                     "Upgrade-Insecure-Request": 1
@@ -88,8 +88,7 @@ class KamTube {
         let quality = "maxres";
         for (let d of data.videoThumbnails) {
             if (d.quality === quality) {
-                console.log(d)
-                return await this.fetcher(d.url);
+                return d.url;
             }
         }
     }
