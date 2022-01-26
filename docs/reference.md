@@ -49,7 +49,7 @@ Params:
 * video_id: id of the video
 
 Returns:
-* a list of objects containing the qualiaty and necessary info to build the query
+* an object with the video title and an infos array containing the necessary info for building the query
 
 ### getVideoDownloadUrl
 Gets the video url, getting the infos from the method above
@@ -59,7 +59,7 @@ Params:
 * quality: the quality of the video, pass "audio" to download as audio
 
 Returns:
-* The encoded URI to direct download
+* an object containing the title of the video and the encoded URI to direct download
 * null in case of error
 
 ### download
@@ -70,7 +70,7 @@ Params:
 * quality: quality of the video, pass "audio" to download as audio
 
 Returns:
-* an arraybuffer with the video or audio download
+* an object containing the title of the video and an arraybuffer with the video or audio download
 * null in case of error
 ### getThumbnail
 Gets the thumbnail url (maxres)
@@ -85,7 +85,6 @@ Saves the video/audio to a file
 
 Params:
 * id: id of the video
-* path: same as filename
 
 Returns:
-* undefined
+* the filename

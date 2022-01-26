@@ -3,7 +3,9 @@ Download video and audio from Youtube
 
 ## Usage
 `npm i kamtube`
+
 `import KamTube from 'kamtube'`
+
 Examples in docs/examples.md
 
 ## Purpose

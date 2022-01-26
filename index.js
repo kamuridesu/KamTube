@@ -81,7 +81,7 @@ class KamTube {
 
     /*
     *   @param {string} video_id
-    *   @return {object}
+    *   @return {Array}
     *   @description: Get the video info to build the query
     */
     async getVideoInfos(video_id) {
@@ -108,7 +108,7 @@ class KamTube {
     /*
     *   @param {string} video_id
     *   @param {string} quality
-    *   @return {string}
+    *   @return {object}
     *   @description: Get the video url
     */
     async getVideoDownloadUrl(video_id, quality) {
@@ -136,7 +136,7 @@ class KamTube {
     /*
     *   @param {string} video_id
     *   @param {string} quality
-    *   @return {arraybuffer}
+    *   @return {object}
     *   @description: Get the video
     */
     async download(video_id, quality) {
@@ -180,7 +180,7 @@ class KamTube {
     /*
     *   @param {string} video_id
     *   @param {string} path
-    *   @return {undefined}
+    *   @return {string}
     */
     async save(id) {
         let data = await this.download(id);
