@@ -6,7 +6,7 @@ Download video and audio from Youtube
 
 `import KamTube from 'kamtube'`
 
-Examples in docs/examples.md
+Examples in [docs/examples.md](https://github.com/kamuridesu/KamTube/blob/main/docs/examples.md)
 
 ## Purpose
 This package uses ytb.trom.tf and Invidious instances to load the videos, retrieve metadata and download. Those youtube alternate frontends aren't blocked on places that youtube may be and are trade-free, making them a good alternative.
