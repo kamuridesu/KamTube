@@ -208,8 +208,3 @@ class KamTube {
 
 
 export default KamTube;
-let x = await new KamTube().playlist("PLxMD4Nzoqa87MZBJIJXGvCql7xEG4028J")
-x.map(async (video) => {
-    console.log("Downloading " + video.title);
-    new KamTube().save(video.videoId);
-});
