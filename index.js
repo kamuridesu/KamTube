@@ -184,14 +184,32 @@ class KamTube {
     */
     async save(id) {
         let data = await this.download(id);
+        if (data == null) throw "Error while downloading";
         const bffer = data.data;
         const name = data.title
         if (data) {
             fs.writeFileSync(name + ".mp4", bffer);
-            return title + ".mp4";
+            return name + ".mp4";
         }
+    }
+
+    /*
+    *   @param {string} playlist_id
+    *   @return {Array}
+    *   @description: Get all the videos from the playlist
+    */
+    async playlist(playlist_id) {
+        const request_url = this.base_api_url + "playlists/" + playlist_id;
+        const data = await this.fetcher(request_url);
+        const videos = data.videos;
+        return videos;
     }
 }
 
 
 export default KamTube;
+let x = await new KamTube().playlist("PLxMD4Nzoqa87MZBJIJXGvCql7xEG4028J")
+x.map(async (video) => {
+    console.log("Downloading " + video.title);
+    new KamTube().save(video.videoId);
+});
