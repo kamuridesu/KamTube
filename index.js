@@ -26,7 +26,7 @@ class KamTube {
             }
             url = id;
         } else if (url.includes("youtube.com")) {
-            url = url.replace("youtube.com/watch?=");
+            url = url.replace("youtube.com/watch?=", "");
         }
         if (url.includes("&")) {
             url = url.split("&")[0];
