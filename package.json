@@ -1,6 +1,6 @@
 {
   "name": "kamtube",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Youtbe video downloader for where youtube is blocked",
   "main": "index.js",
   "scripts": {
@@ -18,7 +18,9 @@
   "homepage": "https://github.com/kamuridesu/KamTube#readme",
   "dependencies": {
     "axios": "^0.25.0",
-    "node-html-parser": "^5.2.0"
+    "node-html-parser": "^5.2.0",
+    "yargs": "^17.3.1"
   },
-  "type": "module"
+  "type": "module",
+  "bin": "cli.js"
 }

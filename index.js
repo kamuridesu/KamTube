@@ -2,9 +2,16 @@ import axios from 'axios';
 import { parse } from 'node-html-parser';
 import fs from 'fs';
 
+
 class KamTube {
-    constructor() {
+    constructor(mode) {
+        this.debug = false;
+        if (mode == "cli") this.debug = true;
         this.base_api_url = "https://invidious.namazso.eu/api/v1/";
+    }
+
+    debug_log(msg) {
+        if (this.debug) console.log(msg);
     }
 
     /*
@@ -59,6 +66,7 @@ class KamTube {
     *   @description: Searches for a video
     */
     async search(query, page, sort_by, date, duration, type, region) {
+        this.debug_log("Searching for: " + query);
         page = page ? page : 1
         sort_by = sort_by ? sort_by : "relevance"
         date = date ? "&date=" + date : ""
@@ -85,8 +93,11 @@ class KamTube {
     *   @description: Get the video info to build the query
     */
     async getVideoInfos(video_id) {
+        this.debug_log("Getting video infos");
         video_id = await this.urlParser(video_id);
+        this.debug_log("Downloading webpage");
         let data = await this.fetcher("https://ytb.trom.tf/watch?v=" + video_id);
+        this.debug_log("Parsing webpage");
         let parser = parse(data);
         let options = parser.getElementsByTagName("select")[0].childNodes;
         const name = parser.getElementsByTagName("title")[0].innerText.replace(" - Invidious", "").trim();
@@ -112,8 +123,10 @@ class KamTube {
     *   @description: Get the video url
     */
     async getVideoDownloadUrl(video_id, quality) {
+        this.debug_log("Getting video url");
         video_id = await this.urlParser(video_id);
-        quality = quality ? quality : "360"
+        quality = quality == "audio" ? "audio/mp4 @ 131.086k" : (quality ? quality : "360");
+        this.debug_log("Getting video informations to build query");
         const base_url = "https://ytb.trom.tf/latest_version?download_widget=";
         const v_data = await this.getVideoInfos(video_id);
         const data = v_data.infos;
@@ -145,6 +158,7 @@ class KamTube {
         const name = video_url_data.name;
         const url = video_url_data.uri;
         try {
+            this.debug_log("Downloading video");
             const response = await axios({
                 method: "get",
                 url: url,
@@ -153,7 +167,7 @@ class KamTube {
                     "Upgrade-Insecure-Request": 1
                 },
                 responseType:'arraybuffer'
-            })
+            });
             return {title: name, data: response.data}
         } catch (e) {
             console.log(e);
@@ -182,15 +196,18 @@ class KamTube {
     *   @param {string} path
     *   @return {string}
     */
-    async save(id) {
-        let data = await this.download(id);
+    async save(id, quality) {
+        let data = await this.download(id, quality);
         if (data == null) throw "Error while downloading";
         const bffer = data.data;
         const name = data.title
         if (data) {
+            this.debug_log("Saving video");
             fs.writeFileSync(name + ".mp4", bffer);
+            this.debug_log("Video saved");
             return name + ".mp4";
         }
+        throw "Error while saving";
     }
 
     /*
@@ -208,3 +225,4 @@ class KamTube {
 
 
 export default KamTube;
+// dQw4w9WgXcQ
