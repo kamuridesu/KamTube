@@ -126,7 +126,7 @@ class KamTube {
     async getVideoDownloadUrl(video_id, quality) {
         this.debug_log("Getting video url");
         video_id = await this.urlParser(video_id);
-        quality = quality == "audio" ? "audio/mp4 @ 131.086k" : (quality ? quality : "360");
+        quality = quality == "audio" ? "audio" : (quality ? quality : "360");
         this.debug_log("Getting video informations to build query");
         const base_url = "https://ytb.trom.tf/latest_version?download_widget=";
         const v_data = await this.getVideoInfos(video_id);
@@ -227,3 +227,4 @@ class KamTube {
 
 export default KamTube;
 // dQw4w9WgXcQ
+console.log(await new KamTube().download("eCoEndBghPM", "audio"))
