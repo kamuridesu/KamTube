@@ -50,6 +50,7 @@ class KamTube {
     *   @description: Get the content of the url
     */
     async fetcher(url) {
+        url = encodeURI(url);
         const response = await axios.get(url);
         return response.data;
     }
