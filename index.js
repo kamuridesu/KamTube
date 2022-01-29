@@ -227,4 +227,3 @@ class KamTube {
 
 export default KamTube;
 // dQw4w9WgXcQ
-console.log(await new KamTube().download("eCoEndBghPM", "audio"))
