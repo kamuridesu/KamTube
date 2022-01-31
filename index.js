@@ -20,6 +20,7 @@ class KamTube {
     *   @description: Get the video id from the url
     */
     async urlParser(url) {
+        console.log(url);
         if(!url.includes("https://")) {
             url = "https://" + url;
         }
@@ -33,7 +34,7 @@ class KamTube {
             }
             url = id;
         } else if (url.includes("youtube.com")) {
-            url = url.replace("youtube.com/watch?=", "");
+            url = url.replace(/(https:\/\/|http:\/)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b\/watch\?v=/, "");
         }
         if (url.includes("&")) {
             url = url.split("&")[0];
