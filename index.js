@@ -20,27 +20,18 @@ class KamTube {
     *   @description: Get the video id from the url
     */
     async urlParser(url) {
-        console.log(url);
-        if(!url.includes("https://")) {
-            url = "https://" + url;
+        url = url.includes("https://") ? url.split("https://")[1] : (url.includes("https://") ? url.split("http://")[1] : url);
+        if (url.includes("shorts")) {
+            url = url.split("shorts/")[1];
+        }
+        if (url.includes("watch")) {
+            url = url.split("watch?v=")[1]
         }
         if (url.includes("youtu.be")) {
-            url = url.split("/");
-            let id = 0;
-            if ("shorts" in url) {
-                id = url[4];
-            } else {
-                id = url[3];
-            }
-            url = id;
-        } else if (url.includes("youtube.com")) {
-            url = url.replace(/(https:\/\/|http:\/)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b\/watch\?v=/, "");
+            url = url.split("youtu.be/")[1];
         }
-        if (url.includes("&")) {
-            url = url.split("&")[0];
-        }
-        if (url.includes("https://")) {
-            url = url.split("https://")[1];
+        if (url.includes("?")) {
+            url = url.split("?")[0];
         }
         return url;
     }
@@ -227,4 +218,3 @@ class KamTube {
 
 
 export default KamTube;
-// dQw4w9WgXcQ
