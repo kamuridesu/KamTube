@@ -193,11 +193,10 @@ class KamTube {
         let data = await this.download(id, quality);
         if (data == null) throw "Error while downloading";
         const bffer = data.data;
-        const name = data.title
+        const name = data.title.replace(/\//g, "-");
         if (data) {
-            this.debug_log("Saving video");
             fs.writeFileSync(name + ".mp4", bffer);
-            this.debug_log("Video saved");
+            this.debug_log("Success!");
             return name + ".mp4";
         }
         throw "Error while saving";
