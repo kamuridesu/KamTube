@@ -1,11 +1,9 @@
 #!/usr/bin/env node
 import KamTube from './index.js';
-import fs from 'fs';
 import _yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 const yargs = _yargs(hideBin(process.argv))
 const kamtube = new KamTube("cli");
-const version = JSON.parse(fs.readFileSync("./package.json")).version;
 
 class cli {
     constructor(extract) {
