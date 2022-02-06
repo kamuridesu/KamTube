@@ -86,7 +86,6 @@ class KamTube {
     *   @description: Get the video info to build the query
     */
     async getVideoInfos(video_id) {
-        this.debug_log("Getting video infos");
         video_id = await this.urlParser(video_id);
         this.debug_log("Downloading webpage");
         let data = await this.fetcher("https://ytb.trom.tf/watch?v=" + video_id);
@@ -116,7 +115,6 @@ class KamTube {
     *   @description: Get the video url
     */
     async getVideoDownloadUrl(video_id, quality) {
-        this.debug_log("Getting video url");
         video_id = await this.urlParser(video_id);
         quality = quality == "audio" ? "audio" : (quality ? quality : "360");
         this.debug_log("Getting video informations to build query");
