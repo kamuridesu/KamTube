@@ -1,6 +1,6 @@
 {
   "name": "kamtube",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Youtbe video downloader for where youtube is blocked",
   "main": "index.js",
   "scripts": {

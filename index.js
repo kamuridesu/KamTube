@@ -41,10 +41,24 @@ class KamTube {
     *   @return {object}
     *   @description: Get the content of the url
     */
-    async fetcher(url) {
+    async fetcher(url, count) {
+        count = count ? count : 0;
         url = encodeURI(url);
-        const response = await axios.get(url);
-        return response.data;
+        if (count >= 3) {
+            if (this.debug) {
+                console.log("Too many requests, aborting");
+                process.exit(1);
+            }
+            throw new Error("Max retries");
+        }
+        try {
+          const response = await axios.get(url);
+          return response.data;
+        } catch (e) {
+            this.debug_log("Error fetching resources!, Retrying...");
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            this.fetcher(url, count + 1);
+        }
     }
 
     /*
@@ -93,13 +107,29 @@ class KamTube {
         let parser = parse(data);
         let options = parser.getElementsByTagName("select")[0].childNodes;
         const name = parser.getElementsByTagName("title")[0].innerText.replace(" - Invidious", "").trim();
-        let infos = {name: name, infos: []};
+        let infos = {name: name, mixed: [], audio: [], video: []};
         for (let i = 0; i < options.length; i++) {
             let option = options[i];
             try{
                 let attrs = option.attrs;
                 if (attrs != undefined) {
-                    infos.infos.push({name: option.text.trim(), urinfo: attrs.value});
+                    let quality_name = option.text.trim();
+                    if (quality_name.includes("audio only")) {
+                        infos.audio.push({
+                            name: quality_name,
+                            url: attrs.value
+                        });
+                    } else if (quality_name.includes("video only")) { 
+                        infos.video.push({
+                            name: quality_name,
+                            url: attrs.value
+                        });
+                    } else {
+                        infos.mixed.push({
+                            name: quality_name,
+                            url: attrs.value
+                        });
+                    }
                 }
             } catch (e) {
                 //
@@ -110,44 +140,49 @@ class KamTube {
 
     /*
     *   @param {string} video_id
+    *   @param {number} audio_video
     *   @param {string} quality
     *   @return {object}
-    *   @description: Get the video url
+    *   @description: Get the video url, pass 0 to get the full video, 1 to get the audio only, 2 to get the video only
     */
-    async getVideoDownloadUrl(video_id, quality) {
+    async getVideoDownloadUrl(video_id, audio_video, quality) {
+        this.debug_log("Getting video url");
         video_id = await this.urlParser(video_id);
-        quality = quality == "audio" ? "audio" : (quality ? quality : "360");
-        this.debug_log("Getting video informations to build query");
         const base_url = "https://ytb.trom.tf/latest_version?download_widget=";
-        const v_data = await this.getVideoInfos(video_id);
-        const data = v_data.infos;
-        const name = v_data.name;
-        try{
-            let request_url = base_url
-            for(let d of data) {
-                if(d.name.includes(quality)) {
-                    request_url += encodeURI(d.urinfo);
-                    break;
+        const video_full_data = await this.getVideoInfos(video_id);
+        let info_to_build_uri = ""
+        if (audio_video == 0) {
+            info_to_build_uri = video_full_data.mixed;
+        } else if (audio_video == 1) {
+            info_to_build_uri = video_full_data.audio;
+        } else if (audio_video == 2) {
+            info_to_build_uri = video_full_data.video;
+        }
+        if (quality == "max") {
+            quality = audio_video == 0 ? info_to_build_uri[audio_video.length - 1].name : info_to_build_uri[0].name;
+        }
+        if (quality) {
+            for (let i = 0; i < info_to_build_uri.length; i++) {
+                if (info_to_build_uri[i].name.includes(quality)) {
+                    return {name: video_full_data.name, url: base_url + encodeURI(info_to_build_uri[i].url)};
                 }
             }
-            return {name: name, uri: request_url};
-        } catch (e) {
-            console.log(e);
-            return null;
         }
+        return {name: video_full_data.name, url: base_url + encodeURI(info_to_build_uri[0].url)};
     }
 
     /*
     *   @param {string} video_id
     *   @param {string} quality
+    *   @param {number} audio_video
     *   @return {object}
     *   @description: Get the video
     */
-    async download(video_id, quality) {
+    async download(video_id, audio_video, quality) {
         video_id = await this.urlParser(video_id);
-        const video_url_data = await this.getVideoDownloadUrl(video_id, quality);
+        const video_url_data = await this.getVideoDownloadUrl(video_id, audio_video, quality);
         const name = video_url_data.name;
-        const url = video_url_data.uri;
+        const url = video_url_data.url;
         try {
             this.debug_log("Downloading video");
             const response = await axios({
@@ -184,11 +219,12 @@ class KamTube {
 
     /*
     *   @param {string} video_id
-    *   @param {string} path
+    *   @param {number} audio_video
+    *   @param {string} quality
     *   @return {string}
     */
-    async save(id, quality) {
-        let data = await this.download(id, quality);
+    async save(id, audio_video, quality) {
+        let data = await this.download(id, audio_video, quality);
         if (data == null) throw "Error while downloading";
         const bffer = data.data;
         const name = data.title.replace(/\//g, "-");
