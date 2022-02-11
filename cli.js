@@ -11,8 +11,8 @@ class cli {
     }
 
     async run(args) {
-        let option = "360";
-        if (this.audio_only) option = "audio";
+        let option = 0;
+        if (this.audio_only) option = 1;
         await kamtube.save((await kamtube.search(args))[0].videoId, option);
     }
 }
@@ -30,11 +30,6 @@ function main () {
             alias: 'h',
             type: 'boolean',
             description: 'Show the help'
-        },
-        'version': {
-            alias: 'v',
-            type: 'boolean',
-            description: 'Show the package version'
         }
     }).argv;
 
