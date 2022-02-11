@@ -30,6 +30,11 @@ function main () {
             alias: 'h',
             type: 'boolean',
             description: 'Show the help'
+        },
+        'version': {
+            alias: 'v',
+            type: 'boolean',
+            description: 'Show the package version'
         }
     }).argv;
 

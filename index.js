@@ -100,7 +100,6 @@ class KamTube {
     *   @description: Get the video info to build the query
     */
     async getVideoInfos(video_id) {
-        this.debug_log("Getting video infos");
         video_id = await this.urlParser(video_id);
         this.debug_log("Downloading webpage");
         let data = await this.fetcher("https://ytb.trom.tf/watch?v=" + video_id);
@@ -228,11 +227,10 @@ class KamTube {
         let data = await this.download(id, audio_video, quality);
         if (data == null) throw "Error while downloading";
         const bffer = data.data;
-        const name = data.title
+        const name = data.title.replace(/\//g, "-");
         if (data) {
-            this.debug_log("Saving video");
             fs.writeFileSync(name + ".mp4", bffer);
-            this.debug_log("Video saved");
+            this.debug_log("Success!");
             return name + ".mp4";
         }
         throw "Error while saving";

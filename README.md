@@ -2,9 +2,16 @@
 Download video and audio from Youtube
 
 ## Usage
+### As package
 `npm i kamtube`
 
 `import KamTube from 'kamtube'`
+### As CLI app
+`npm i -g kamtube@latest`
+
+`kamtube [URL|search query]`
+
+CLI also supports `-x` argument, this means that only the audio will be downloaded.
 
 Examples in [docs/examples.md](https://github.com/kamuridesu/KamTube/blob/main/docs/examples.md)
 
