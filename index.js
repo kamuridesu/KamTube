@@ -150,14 +150,13 @@ class KamTube {
         video_id = await this.urlParser(video_id);
         const base_url = "https://ytb.trom.tf/latest_version?download_widget=";
         const video_full_data = await this.getVideoInfos(video_id);
-        let info_to_build_uri = ""
-        if (audio_video == 0) {
-            info_to_build_uri = video_full_data.mixed;
-        } else if (audio_video == 1) {
+        let info_to_build_uri = video_full_data.mixed
+        if (audio_video == 1) {
             info_to_build_uri = video_full_data.audio;
         } else if (audio_video == 2) {
             info_to_build_uri = video_full_data.video;
         }
+        console.log(info_to_build_uri);
         if (quality == "max") {
             quality = audio_video == 0 ? info_to_build_uri[audio_video.length - 1].name : info_to_build_uri[0].name;
         }
@@ -168,9 +167,8 @@ class KamTube {
                 }
             }
         }
-        return {name: video_full_data.name, url: base_url + encodeURI(info_to_build_uri[0].url)};
+        return {name: video_full_data.name, url: base_url + encodeURI(info_to_build_uri[1].url)};
     }
-
     /*
     *   @param {string} video_id
     *   @param {string} quality
