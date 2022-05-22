@@ -5,13 +5,14 @@ import fs from 'fs';
 
 class KamTube {
     constructor(mode) {
-        this.debug = false;
-        if (mode == "cli") this.debug = true;
+        this.cli = false;
+        if (mode == "cli") this.cli = true;
         this.base_api_url = "https://invidious.namazso.eu/api/v1/";
+        this.download_endpoint = "https://ytb.trom.tf/download";
     }
 
-    debug_log(msg) {
-        if (this.debug) console.log(msg);
+    cli_log(msg) {
+        if (this.cli) console.log(msg);
     }
 
     /*
@@ -45,7 +46,7 @@ class KamTube {
         count = count ? count : 0;
         url = encodeURI(url);
         if (count >= 3) {
-            if (this.debug) {
+            if (this.cli) {
                 console.log("Too many requests, aborting");
                 process.exit(1);
             }
@@ -55,7 +56,7 @@ class KamTube {
           const response = await axios.get(url);
           return response.data;
         } catch (e) {
-            this.debug_log("Error fetching resources!, Retrying...");
+            this.cli_log("Error fetching resources!, Retrying...");
             await new Promise(resolve => setTimeout(resolve, 1000));
             this.fetcher(url, count + 1);
         }
@@ -73,7 +74,7 @@ class KamTube {
     *   @description: Searches for a video
     */
     async search(query, page, sort_by, date, duration, type, region) {
-        this.debug_log("Searching for: " + query);
+        this.cli_log("Searching for: " + query);
         page = page ? page : 1
         sort_by = sort_by ? sort_by : "relevance"
         date = date ? "&date=" + date : ""
@@ -101,9 +102,9 @@ class KamTube {
     */
     async getVideoInfos(video_id) {
         video_id = await this.urlParser(video_id);
-        this.debug_log("Downloading webpage");
+        this.cli_log("Downloading webpage");
         let data = await this.fetcher("https://ytb.trom.tf/watch?v=" + video_id);
-        this.debug_log("Parsing webpage");
+        this.cli_log("Parsing webpage");
         let parser = parse(data);
         let options = parser.getElementsByTagName("select")[0].childNodes;
         const name = parser.getElementsByTagName("title")[0].innerText.replace(" - Invidious", "").trim();
@@ -138,61 +139,84 @@ class KamTube {
         return infos;
     }
 
+    /* @param {string} media_id
+    *  @param {number} audio_or_video 1 for audio only, 2 for video only
+    *  @return {object}
+    *  @description: Get the media resolution options
+    */
+    async getMediaQuality(media_id, audio_or_video) {
+        this.cli_log("Getting quality options...");
+        media_id = await this.urlParser(media_id);
+        const base_url = "https://ytb.trom.tf/latest_version?download_widget=";
+        const media_full_data = await this.getVideoInfos(media_id);
+        let media_data = media_full_data.mixed;
+        if(audio_or_video == 1) {
+            media_data = media_full_data.audio;
+        } else if(audio_or_video == 2) {
+            media_data = media_full_data.video;
+        }
+        return {'media_title': media_full_data.name, "qualities": media_data};
+    }
+
     /*
-    *   @param {string} video_id
-    *   @param {number} audio_video
+    *   @param {string} media_id
+    *   @param {number} audio_or_video
     *   @param {string} quality
     *   @return {object}
     *   @description: Get the video url, pass 0 to get the full video, 1 to get the audio only, 2 to get the video only
     */
-    async getVideoDownloadUrl(video_id, audio_video, quality) {
-        this.debug_log("Getting video url");
-        video_id = await this.urlParser(video_id);
-        const base_url = "https://ytb.trom.tf/latest_version?download_widget=";
-        const video_full_data = await this.getVideoInfos(video_id);
-        let info_to_build_uri = video_full_data.mixed
-        if (audio_video == 1) {
-            info_to_build_uri = video_full_data.audio;
-        } else if (audio_video == 2) {
-            info_to_build_uri = video_full_data.video;
-        }
-        console.log(info_to_build_uri);
-        if (quality == "max") {
-            quality = audio_video == 0 ? info_to_build_uri[audio_video.length - 1].name : info_to_build_uri[0].name;
-        }
-        if (quality) {
-            for (let i = 0; i < info_to_build_uri.length; i++) {
-                if (info_to_build_uri[i].name.includes(quality)) {
-                    return {name: video_full_data.name, url: base_url + encodeURI(info_to_build_uri[i].url)};
+    async getMediaDownloadBody(media_id, audio_or_video, quality) {
+        this.cli_log("Getting video url");
+        media_id = await this.urlParser(media_id);
+        let aviable_qualities_infos = await this.getMediaQuality(media_id, audio_or_video);
+        let aviable_qualities = aviable_qualities_infos.qualities;
+        let media_title = aviable_qualities_infos.media_title;
+        if(quality) {
+            if(quality == 'max') {
+                quality = audio_or_video == 0 ? aviable_qualities[0] : aviable_qualities[aviable_qualities.length - 1];
+            } else {
+                for(let i = 0; i < aviable_qualities.length; i++) {
+                    if(aviable_qualities[i].name.includes(quality)) {
+                        quality = aviable_qualities[i];
+                    }
                 }
             }
+        } else {
+            quality = aviable_qualities.length > 1 ? aviable_qualities[1] : aviable_qualities[0];
         }
-        return {name: video_full_data.name, url: base_url + encodeURI(info_to_build_uri[1].url)};
+        let body = {
+            'id': media_id,
+            'title': media_title,
+            'download_widget': quality.url
+        }
+        return body;
     }
+
     /*
     *   @param {string} video_id
     *   @param {string} quality
-    *   @param {number} audio_video
+    *   @param {number} audio_or_video
     *   @return {object}
     *   @description: Get the video
     */
-    async download(video_id, audio_video, quality) {
-        video_id = await this.urlParser(video_id);
-        const video_url_data = await this.getVideoDownloadUrl(video_id, audio_video, quality);
-        const name = video_url_data.name;
-        const url = video_url_data.url;
+    async download(media_id, audio_or_video, quality) {
+        media_id = await this.urlParser(media_id);
+        const media_download_body = await this.getMediaDownloadBody(media_id, audio_or_video, quality);
+        const body = `id=${media_download_body.id}&title=${media_download_body.title}&download_widget=${encodeURIComponent(media_download_body.download_widget)}`
+        const title = media_download_body.title;
         try {
-            this.debug_log("Downloading video");
+            this.cli_log("Downloading media");
             const response = await axios({
-                method: "get",
-                url: url,
+                method: "post",
+                url: this.download_endpoint,
+                data: body,
                 headers: {
                     "DNT": 1,
                     "Upgrade-Insecure-Request": 1
                 },
                 responseType:'arraybuffer'
             });
-            return {title: name, data: response.data}
+            return {title: title, data: response.data}
         } catch (e) {
             console.log(e);
             return null;
@@ -217,19 +241,20 @@ class KamTube {
 
     /*
     *   @param {string} video_id
-    *   @param {number} audio_video
+    *   @param {number} audio_or_video
     *   @param {string} quality
     *   @return {string}
     */
-    async save(id, audio_video, quality) {
-        let data = await this.download(id, audio_video, quality);
+    async save(id, audio_or_video, quality) {
+        let data = await this.download(id, audio_or_video, quality);
         if (data == null) throw "Error while downloading";
         const bffer = data.data;
         const name = data.title.replace(/\//g, "-");
         if (data) {
-            fs.writeFileSync(name + ".mp4", bffer);
-            this.debug_log("Success!");
-            return name + ".mp4";
+            const ext = audio_or_video == 1 ? ".mp3" : ".mp4"
+            fs.writeFileSync(name + ext, bffer);
+            this.cli_log("Success!");
+            return name + ext;
         }
         throw "Error while saving";
     }
