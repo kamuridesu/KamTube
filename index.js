@@ -103,16 +103,16 @@ class KamTube {
     async getVideoInfos(video_id) {
         video_id = await this.urlParser(video_id);
         this.cli_log("Downloading webpage");
-        let data = await this.fetcher("https://ytb.trom.tf/watch?v=" + video_id);
+        const data = await this.fetcher("https://ytb.trom.tf/watch?v=" + video_id);
         this.cli_log("Parsing webpage");
-        let parser = parse(data);
-        let options = parser.getElementsByTagName("select")[0].childNodes;
+        const parser = parse(data);
+        const options = parser.getElementsByTagName("select")[0].childNodes;
         const name = parser.getElementsByTagName("title")[0].innerText.replace(" - Invidious", "").trim();
-        let infos = {name: name, mixed: [], audio: [], video: []};
+        const infos = {name: name, mixed: [], audio: [], video: []};
         for (let i = 0; i < options.length; i++) {
-            let option = options[i];
+            const option = options[i];
             try{
-                let attrs = option.attrs;
+                const attrs = option.attrs;
                 if (attrs != undefined) {
                     let quality_name = option.text.trim();
                     if (quality_name.includes("audio only")) {
@@ -168,9 +168,9 @@ class KamTube {
     async getMediaDownloadBody(media_id, audio_or_video, quality) {
         this.cli_log("Getting video url");
         media_id = await this.urlParser(media_id);
-        let aviable_qualities_infos = await this.getMediaQuality(media_id, audio_or_video);
-        let aviable_qualities = aviable_qualities_infos.qualities;
-        let media_title = aviable_qualities_infos.media_title;
+        const aviable_qualities_infos = await this.getMediaQuality(media_id, audio_or_video);
+        const aviable_qualities = aviable_qualities_infos.qualities;
+        const media_title = aviable_qualities_infos.media_title;
         if(quality) {
             if(quality == 'max') {
                 quality = audio_or_video == 0 ? aviable_qualities[0] : aviable_qualities[aviable_qualities.length - 1];
@@ -205,7 +205,7 @@ class KamTube {
         const body = `id=${media_download_body.id}&title=${media_download_body.title}&download_widget=${encodeURIComponent(media_download_body.download_widget)}`
         const title = media_download_body.title;
         try {
-            this.cli_log("Downloading media");
+            this.cli_log("Downloading media, please wait.");
             const response = await axios({
                 method: "post",
                 url: this.download_endpoint,
@@ -214,7 +214,10 @@ class KamTube {
                     "DNT": 1,
                     "Upgrade-Insecure-Request": 1
                 },
-                responseType:'arraybuffer'
+                responseType:'arraybuffer',
+                onDownloadProgress: (pg_event) => {
+                    console.log(pg_event.total);
+                }
             });
             return {title: title, data: response.data}
         } catch (e) {
@@ -230,9 +233,9 @@ class KamTube {
     */
     async getThumbnail(video_id) {
         video_id = await this.urlParser(video_id);
-        let data = await this.getFullMetadata(video_id);
-        let quality = "maxres";
-        for (let d of data.videoThumbnails) {
+        const data = await this.getFullMetadata(video_id);
+        const quality = "maxres";
+        for (const d of data.videoThumbnails) {
             if (d.quality === quality) {
                 return d.url;
             }
@@ -246,7 +249,7 @@ class KamTube {
     *   @return {string}
     */
     async save(id, audio_or_video, quality) {
-        let data = await this.download(id, audio_or_video, quality);
+        const data = await this.download(id, audio_or_video, quality);
         if (data == null) throw "Error while downloading";
         const bffer = data.data;
         const name = data.title.replace(/\//g, "-");
