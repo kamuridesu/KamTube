@@ -54,10 +54,10 @@ class cli {
             const choosen_video = results[option];
             // console.log(choosen_video);
             this.choosen_video = choosen_video;
-            console.log("Now choose the quality: ");
             let aud_only = 0;
             if (this.audio_only) aud_only = 1;
             const qualities = (await kamtube.getMediaQuality(choosen_video.videoId, aud_only)).qualities;
+            console.log("Now choose the quality: ");
             for(const [index, qua] of qualities.entries()) {
                 const out = `[${index}] - ${qua.name}`
                 console.log(out);

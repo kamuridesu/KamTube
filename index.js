@@ -3,9 +3,59 @@ import { parse } from 'node-html-parser';
 import fs from 'fs';
 
 
+/*
+*   @param {string} url
+*   @return {string} with the url of the video
+*   @description: Get the video id from the url
+*/
+async function urlParser(url) {
+    url = url.includes("https://") ? url.split("https://")[1] : (url.includes("https://") ? url.split("http://")[1] : url);
+    if (url.includes("shorts")) {
+        url = url.split("shorts/")[1];
+    }
+    if (url.includes("watch")) {
+        url = url.split("watch?v=")[1]
+    }
+    if (url.includes("youtu.be")) {
+        url = url.split("youtu.be/")[1];
+    }
+    if (url.includes("?")) {
+        url = url.split("?")[0];
+    }
+    return url;
+}
+
+/*
+*   @param {string} url: The url of the video
+*   @param {number} count: Retry count
+*   @return {object} with the data
+*   @description: Get the content of the url
+*/
+async function fetcher(url, count) {
+    count = count ? count : 0;
+    url = encodeURI(url);
+    if (count >= 3) {
+        if (this.cli) {
+            console.log("Too many requests, aborting");
+            process.exit(1);
+        }
+        throw new Error("Max retries");
+    }
+    try {
+      const response = await axios.get(url);
+      return response.data;
+    } catch (e) {
+        this.cli_log("Error fetching resources!, Retrying...");
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        fetcher(url, count + 1);
+    }
+}
+
+
 class KamTube {
-    constructor(mode) {
+    constructor(mode, debug) {
         this.cli = false;
+        this.debug = debug ? debug: false;
         if (mode == "cli") this.cli = true;
         this.base_api_url = "https://invidious.namazso.eu/api/v1/";
         this.download_endpoint = "https://ytb.trom.tf/download";
@@ -15,51 +65,8 @@ class KamTube {
         if (this.cli) console.log(msg);
     }
 
-    /*
-    *   @param {string} url
-    *   @return {string}
-    *   @description: Get the video id from the url
-    */
-    async urlParser(url) {
-        url = url.includes("https://") ? url.split("https://")[1] : (url.includes("https://") ? url.split("http://")[1] : url);
-        if (url.includes("shorts")) {
-            url = url.split("shorts/")[1];
-        }
-        if (url.includes("watch")) {
-            url = url.split("watch?v=")[1]
-        }
-        if (url.includes("youtu.be")) {
-            url = url.split("youtu.be/")[1];
-        }
-        if (url.includes("?")) {
-            url = url.split("?")[0];
-        }
-        return url;
-    }
-
-    /*
-    *   @param {string} url
-    *   @return {object}
-    *   @description: Get the content of the url
-    */
-    async fetcher(url, count) {
-        count = count ? count : 0;
-        url = encodeURI(url);
-        if (count >= 3) {
-            if (this.cli) {
-                console.log("Too many requests, aborting");
-                process.exit(1);
-            }
-            throw new Error("Max retries");
-        }
-        try {
-          const response = await axios.get(url);
-          return response.data;
-        } catch (e) {
-            this.cli_log("Error fetching resources!, Retrying...");
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            this.fetcher(url, count + 1);
-        }
+    debug_log(msg) {
+        if (this.debug) console.log(msg);
     }
 
     /*
@@ -82,7 +89,7 @@ class KamTube {
         type = type ? type : "video"
         region = region ? region : "US"
         const full_query = `search?q=${query}&page=${page}&sort_by=${sort_by}${date}${duration}&type=${type}&region=${region}`
-        return await this.fetcher(this.base_api_url + full_query)
+        return await fetcher(this.base_api_url + full_query)
     }
 
     /*
@@ -91,8 +98,8 @@ class KamTube {
     *   @description: Get the video full info
     */
     async getFullMetadata(video_id) {
-        video_id = await this.urlParser(video_id);
-        return await this.fetcher(this.base_api_url + `videos/${video_id}`)
+        video_id = await urlParser(video_id);
+        return await fetcher(this.base_api_url + `videos/${video_id}`)
     }
 
     /*
@@ -101,10 +108,8 @@ class KamTube {
     *   @description: Get the video info to build the query
     */
     async getVideoInfos(video_id) {
-        video_id = await this.urlParser(video_id);
-        this.cli_log("Downloading webpage");
-        let data = await this.fetcher("https://ytb.trom.tf/watch?v=" + video_id);
-        this.cli_log("Parsing webpage");
+        video_id = await urlParser(video_id);
+        let data = await fetcher("https://ytb.trom.tf/watch?v=" + video_id);
         let parser = parse(data);
         let options = parser.getElementsByTagName("select")[0].childNodes;
         const name = parser.getElementsByTagName("title")[0].innerText.replace(" - Invidious", "").trim();
@@ -146,7 +151,7 @@ class KamTube {
     */
     async getMediaQuality(media_id, audio_or_video) {
         this.cli_log("Getting quality options...");
-        media_id = await this.urlParser(media_id);
+        media_id = await urlParser(media_id);
         const base_url = "https://ytb.trom.tf/latest_version?download_widget=";
         const media_full_data = await this.getVideoInfos(media_id);
         let media_data = media_full_data.mixed;
@@ -167,7 +172,7 @@ class KamTube {
     */
     async getMediaDownloadBody(media_id, audio_or_video, quality) {
         this.cli_log("Getting video url");
-        media_id = await this.urlParser(media_id);
+        media_id = await urlParser(media_id);
         let aviable_qualities_infos = await this.getMediaQuality(media_id, audio_or_video);
         let aviable_qualities = aviable_qualities_infos.qualities;
         let media_title = aviable_qualities_infos.media_title;
@@ -200,7 +205,7 @@ class KamTube {
     *   @description: Get the video
     */
     async download(media_id, audio_or_video, quality) {
-        media_id = await this.urlParser(media_id);
+        media_id = await urlParser(media_id);
         const media_download_body = await this.getMediaDownloadBody(media_id, audio_or_video, quality);
         const body = `id=${media_download_body.id}&title=${media_download_body.title}&download_widget=${encodeURIComponent(media_download_body.download_widget)}`
         const title = media_download_body.title;
@@ -229,7 +234,7 @@ class KamTube {
     *   @description: Get the video thumbnail
     */
     async getThumbnail(video_id) {
-        video_id = await this.urlParser(video_id);
+        video_id = await urlParser(video_id);
         let data = await this.getFullMetadata(video_id);
         let quality = "maxres";
         for (let d of data.videoThumbnails) {
@@ -266,7 +271,7 @@ class KamTube {
     */
     async playlist(playlist_id) {
         const request_url = this.base_api_url + "playlists/" + playlist_id;
-        const data = await this.fetcher(request_url);
+        const data = await fetcher(request_url);
         const videos = data.videos;
         return videos;
     }
