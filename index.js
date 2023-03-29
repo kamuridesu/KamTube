@@ -45,7 +45,6 @@ async function fetcher(url, count) {
       const response = await axios.get(url);
       return response.data;
     } catch (e) {
-        this.cli_log("Error fetching resources!, Retrying...");
         await new Promise(resolve => setTimeout(resolve, 1000));
         fetcher(url, count + 1);
     }
