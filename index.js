@@ -102,10 +102,10 @@ class KamTube {
         if (!quality && media_type !== "subs") {
             quality = Math.max(...available_qualities_infos.map(x => x.quality));
         }
-        const item = available_qualities_infos.find(x => x.quality === quality);
+        const item = available_qualities_infos.find(x => x.quality == quality);
         if (item) {
             return {
-                id: media_id,
+                id: urlParse(media_id),
                 title: data.title,
                 query: item.query,
                 extension: item.extension,

@@ -1,28 +1,14 @@
 import { parse } from 'node-html-parser';
 
 function urlParse(url) {
-    const regex1 = /^(?:http:\/\/)?youtu\.be/;
-    const regex2 = /^(?:(?:http:)?\/\/)?(?:www\.)?youtube(?:-nocookie)?.com/;
-    const regex3 = /(?:http:\/\/)?(?:www\.)?youtube\.com.*?v=(.{11})/;
-    const regex4 = /(?:vi=|vi?\/|embed\/)(.{11})/;
-    
-    if (regex1.test(url)) {
-      return url.match(/^(?:http:\/\/)?youtu\.be\/(.{11})/)[1];
-    } else if (regex2.test(url)) {
-      let match = url.match(regex3);
-      if (!match) {
-        match = url.match(regex4);
-      }
-      if (!match && /user/.test(url)) {
-        match = url.split("/");
-        return match[match.length - 1].split("?")[0];
-      }
-      return (match || ["", url])[1];
-    } else if (!/\//.test(url)) {
-      return url;
-    } else {
-      return null;
-    }
+	const regex = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#&?]*).*/;
+	const match = url.match(regex);
+	if (match && match[2]) {
+		return match[2];
+	} else {
+		// Handle invalid YouTube URL
+		return url;
+	}
 }
 
 function parseVideoPage(document) {
