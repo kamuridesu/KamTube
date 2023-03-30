@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { KamTube } from './index.js';
 import { formatDuration } from "./src/parsers.js";
 

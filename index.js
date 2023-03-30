@@ -117,6 +117,7 @@ class KamTube {
 
     async download(media_id, media_type="mixed", quality=null) {
         const body = await this.processDownloadBody(media_id, media_type, quality);
+        this.cliLog("Downloading " + body["title"]);
         const headers ={
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0",
             "Accept": "*/*",
