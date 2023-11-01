@@ -1,6 +1,6 @@
 {
   "name": "@kamuridesu/kamtube",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "Youtube video downloader for when youtube is blocked",
   "main": "index.js",
   "scripts": {
@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/kamuridesu/KamTube#readme",
   "dependencies": {
-    "axios": "^0.27.2",
+    "axios": "^1.6.0",
     "node-html-parser": "^5.2.0",
     "yargs": "^17.3.1"
   },
