@@ -8,8 +8,8 @@ class KamTube {
         this.debug = debug;
         this.cli = mode === "cli";
         this.base_api_url = "https://invidious.namazso.eu/api/v1/";
-        this.video_html_page = "https://ytb.trom.tf/watch?v=";
-        this.download_endpoint = "https://ytb.trom.tf/download";
+        this.video_html_page = "https://inv.kamuridesu.com/watch?v=";
+        this.download_endpoint = "https://inv.kamuridesu.com/download";
     }
 
     async cliLog(message) {
@@ -60,7 +60,6 @@ class KamTube {
     async getMediaInfo(media_id){
         media_id = urlParse(media_id);
         const headers = {
-            "Host": "ytb.trom.tf",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
             "Accept-Language": "en-US,en;q=0.5",
