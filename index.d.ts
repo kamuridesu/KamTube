@@ -36,6 +36,7 @@ export declare interface SearchAPIResponse {
     playlistThumbnail?: string;
     videoCount?: number;
     videos?: Video[];
+    videoId?: string;
 }
 
 

@@ -1,6 +1,6 @@
 {
   "name": "@kamuridesu/kamtube",
-  "version": "0.1.20",
+  "version": "0.1.21",
   "description": "Youtube video downloader for when youtube is blocked",
   "main": "index.js",
   "scripts": {
