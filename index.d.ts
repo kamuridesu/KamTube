@@ -1,18 +1,18 @@
-interface Video {
+export declare interface Video {
     title: string;
     videoId: string;
     lengthSeconds: number;
     videoThumbnails: Thumbnails;
 }
 
-interface Thumbnails {
+export declare interface Thumbnails {
     quality?: string;
     url: string;
     width: number;
     height: number;
 }
 
-interface SearchAPIResponse {
+export declare interface SearchAPIResponse {
     type: string;
     title?: string;
     author: string;
