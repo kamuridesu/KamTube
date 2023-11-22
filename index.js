@@ -7,7 +7,7 @@ class KamTube {
         this.mode = mode;
         this.debug = debug;
         this.cli = mode === "cli";
-        this.base_api_url = "https://invidious.namazso.eu/api/v1/";
+        this.base_api_url = "https://inv.kamuridesu.com/api/v1/";
         this.video_html_page = "https://inv.kamuridesu.com/watch?v=";
         this.download_endpoint = "https://inv.kamuridesu.com/download";
     }
