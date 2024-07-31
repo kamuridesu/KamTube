@@ -55,7 +55,7 @@ declare class KamTube {
         duration?: string,
         _type?: string,
         region?: string
-    ): Promise<SearchAPIResponse[]|null>;
+    ): Promise<SearchAPIResponse[]>;
     getMediaMetadata(media_id: string): Promise<any>;
     getMediaInfo(media_id: string): Promise<{
         title: string;

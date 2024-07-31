@@ -2,14 +2,20 @@ import { get, post } from "./src/networking.js"
 import { urlParse, parseVideoPage } from "./src/parsers.js";
 import { promises as fs } from 'fs';
 
+const API_URL = process.env.INVIDIOUS_API_URL ? process.env.INVIDIOUS_API_URL : "inv.kamuridesu.com";
+const HTML_URL = process.env.INVIDIOUS_HOME_URL ? process.env.INVIDIOUS_HOME_URL : "inv.kamuridesu.com";
+const DOWNLOAD_URL = process.env.INVIDIOUS_DOWNLOAD_URL ? process.env.INVIDIOUS_DOWNLOAD_URL : "inv.kamuridesu.com";
+
 class KamTube {
     constructor(mode = "string", debug = false) {
         this.mode = mode;
         this.debug = debug;
         this.cli = mode === "cli";
-        this.base_api_url = "https://inv.kamuridesu.com/api/v1/";
-        this.video_html_page = "https://inv.kamuridesu.com/watch?v=";
-        this.download_endpoint = "https://inv.kamuridesu.com/download";
+        this.base_api_url = `https://${API_URL}/api/v1/`
+        this.video_html_page = `https://${HTML_URL}/watch?v=`;
+        this.download_endpoint = `https://${DOWNLOAD_URL}/download`;
+
+        
     }
 
     async cliLog(message) {
@@ -32,7 +38,7 @@ class KamTube {
         region = region ? `&region=${region}` : "";
         const full_query = `search?q=${query}&page=${page}&sort_by=${sort_by}${duration}${date}&type=${_type}${region}`;
         const response = (await get(this.base_api_url + full_query));
-        return response;
+        return response ? response : [];
     }
 
     async getMediaMetadata(media_id) {

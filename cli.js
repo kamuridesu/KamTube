@@ -12,7 +12,7 @@ class CLI {
     }
 
     async search(query) {
-        const results = await this.downloader.search(query);
+        const results = (await this.downloader.search(query)).filter(x => x.type != 'playlist' && x.type != 'channel');
         const template = '[{id}] - {title} - {duration}';
         const results_formatted = results
             .map((result, id) =>
@@ -108,7 +108,7 @@ Flags:
     };
     if (!args.length) {
         usage();
-        throw new Error();
+        process.exit(1)
     }
     const known_flags = ['-x', '--extract', '-d', '--direct', '-h', '--help'];
     let extract = 'mixed';
@@ -143,8 +143,13 @@ Flags:
         await cli.directDownload(query);
         console.log('Download complete!');
     } else {
-        await cli.interactiveSearch(query);
-        console.log('Download complete!');
+        try {
+            await cli.interactiveSearch(query);
+            console.log('Download complete!');
+        } catch (e) {
+            // console.log(e);
+            process.exit(1);
+        }
     }
 }
 
